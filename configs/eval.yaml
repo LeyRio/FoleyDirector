@@ -1,0 +1,17 @@
+# Inherit train.yaml but override sampling-related flags for eval / inference.
+
+defaults:
+  - train
+  - _self_
+
+# CFG / sampling overrides for evaluation
+cfg_strength: 4.5
+sampling:
+  mean: 0.0
+  scale: 1.0
+  min_sigma: 0.0
+  method: euler
+  num_steps: 25
+
+# Where to dump generated audio
+output_dir: ${prefix}/eval_output/${exp_id}

@@ -1,0 +1,148 @@
+defaults:
+  - data: vggsound_director
+  - eval_data: directorbench
+  - override hydra/job_logging: custom-simplest
+  - _self_
+
+# -----------------------------------------------------------------------------
+# Run / experiment metadata
+# -----------------------------------------------------------------------------
+hydra:
+  run:
+    dir: ${prefix}/train_output/${exp_id}
+  output_subdir: train-${now:%Y-%m-%d_%H-%M-%S}-hydra
+
+prefix: ${oc.env:DATA_PREFIX,./data_root}
+
+exp_id: foleydirector_default
+debug: False
+seed: 14159265
+cudnn_benchmark: True
+compile: True
+amp: True
+enable_email: False
+
+# -----------------------------------------------------------------------------
+# Backbone / sequence dims (resolved by train.py based on `model`)
+# -----------------------------------------------------------------------------
+model: medium_44k
+weights: ${prefix}/checkpoints/mmaudio_medium_44k.pth
+checkpoint: null
+
+data_dim:
+  text_seq_len: 77
+  clip_dim: 1024
+  sync_dim: 768
+  text_dim: 1024
+
+# -----------------------------------------------------------------------------
+# CLIP encoder used for Structured Temporal Scripts
+# -----------------------------------------------------------------------------
+clip:
+  weights_dir: checkpoints/DFN5B-CLIP-ViT-H-14-384
+  tokenizer_dir: checkpoints/ViT-H-14-378-quickgelu__dfn5b
+
+# -----------------------------------------------------------------------------
+# External feature extractors (paths are relative to ${prefix})
+# -----------------------------------------------------------------------------
+vae_16k_ckpt: ${prefix}/checkpoints/v1-16.pth
+vae_44k_ckpt: ${prefix}/checkpoints/v1-44.pth
+bigvgan_vocoder_ckpt: ${prefix}/checkpoints/best_netG.pt
+synchformer_ckpt: ${prefix}/checkpoints/synchformer_state_dict.pth
+
+# -----------------------------------------------------------------------------
+# Optimisation
+# -----------------------------------------------------------------------------
+batch_size: 8           # global batch size; train.py divides by num_gpus
+eval_batch_size: 1
+num_iterations: 300_000
+learning_rate: 1.0e-4
+linear_warmup_steps: 1_000
+clip_grad_norm: 1.0
+weight_decay: 1.0e-6
+use_muon: False
+
+lr_schedule: step
+lr_schedule_steps: [240_000, 270_000]
+lr_schedule_gamma: 0.1
+
+# -----------------------------------------------------------------------------
+# Logging / checkpointing
+# -----------------------------------------------------------------------------
+log_text_interval: 200
+log_extra_interval: 20_000
+val_interval: 5_000
+eval_interval: 1_000_000_000
+save_eval_interval: 1_000_000_000
+save_weights_interval: 10000
+save_checkpoint_interval: 10000
+save_copy_iterations: [600000, 700000, 800000, 900000, 1000000]
+
+# -----------------------------------------------------------------------------
+# EMA
+# -----------------------------------------------------------------------------
+ema:
+  enable: True
+  start: 0
+  sigma_rels: [0.05, 0.1]
+  update_every: 1
+  checkpoint_every: 100_000
+  checkpoint_folder: ${hydra:run.dir}/ema_ckpts
+  default_output_sigma: 0.05
+
+# -----------------------------------------------------------------------------
+# Sampling / classifier-free guidance
+# -----------------------------------------------------------------------------
+sampling:
+  mean: 0.0
+  scale: 1.0
+  min_sigma: 0.0
+  method: euler
+  num_steps: 25
+null_condition_probability: 0.1
+cfg_strength: 4.5
+
+# -----------------------------------------------------------------------------
+# FoleyDirector specific knobs
+# -----------------------------------------------------------------------------
+train_full: True            # train all params; otherwise only the STS adapter
+sep_fgc: True               # use separate STS branch (Script-Guided Temporal Fusion)
+joint_fgc: False
+delay_fusion: False
+interleaved_rope: True      # Interleaved RoPE inside SG-TFM
+fusion_fgc_clip: False
+clip_train: False
+
+fgc_pool: False             # mean-pool tokens vs. take first fgc_pt tokens
+fgc_pt: 10                  # number of script tokens per segment (8 segments total)
+fgc_dim: 1024
+v2_ratio: 0.0               # ratio of variable-duration STS samples per batch
+text_model_type: siglip-base
+
+# -----------------------------------------------------------------------------
+# Dataset toggles
+# -----------------------------------------------------------------------------
+mini_train: False
+fttrain: False
+fgctrain: True
+example_train: False
+enable_grad_scaler: False
+drop_ratio: 0.0
+video_drop_ratio: 0.0
+text_drop_ratio: 0.0
+
+with_bilibili: False        # disabled by default in the public release
+with_bilibili_sub: False
+with_details: True
+
+threshold: 6.5
+dynamic_threshold: False
+dt_list: [3.0, 4.5, 5.5, 6.5]
+dynamic_iterations: 5
+vgg_oversample_rate: 3
+
+# -----------------------------------------------------------------------------
+# Dataloader
+# -----------------------------------------------------------------------------
+num_workers: 8
+pin_memory: False

@@ -1,0 +1,34 @@
+# Default training datasets for FoleyDirector.
+#
+# Paths are resolved relative to ${prefix} (set via env var DATA_PREFIX).
+# Replace these with your own data layout.
+
+# ---- DirectorSound (paired video-audio + STS annotations) -------------------
+DirectorSound:
+  tsv: ${prefix}/datasets/director_sound/train.tsv
+  memmap_dir: ${prefix}/datasets/director_sound/memmap
+  fgc: ${prefix}/datasets/director_sound/sts_annotations.json
+
+# ---- VGGSound (general video-to-audio pretraining) --------------------------
+VGGSound:
+  root: ${prefix}/datasets/VGGSound/video
+  subset_name: sets/vgg-train.tsv
+  fps: 8
+  height: 384
+  width: 384
+  sample_duration_sec: 8.0
+
+ExtractedVGG:
+  tsv: ${prefix}/datasets/VGGSound/memmap/vgg-train.tsv
+  memmap_dir: ${prefix}/datasets/VGGSound/memmap/vgg-train
+
+ExtractedVGGFGC:
+  tsv: ${prefix}/datasets/VGGSound/memmap/vgg-train.tsv
+  memmap_dir: ${prefix}/datasets/VGGSound/memmap/vgg-train
+  fgc: ${prefix}/datasets/VGGSound/sts_annotations.json
+
+# ---- AudioCaps (text-conditioned pretraining) -------------------------------
+ExtractedAudioCaps:
+  tsv: ${prefix}/datasets/audiocaps/memmap/train.tsv
+  memmap_dir: ${prefix}/datasets/audiocaps/memmap/train
+  fgc: ${prefix}/datasets/audiocaps/sts_annotations.json

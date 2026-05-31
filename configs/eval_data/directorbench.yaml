@@ -1,0 +1,17 @@
+# Evaluation benchmarks for FoleyDirector.
+
+DirectorBench:
+  tag: directorbench
+  gt_cache: ${prefix}/datasets/directorbench/cache
+  output_subdir: null
+  tsv: ${prefix}/datasets/directorbench/memmap/test.tsv
+  memmap_dir: ${prefix}/datasets/directorbench/memmap/test
+  fgc: ${prefix}/datasets/directorbench/sts_annotations.json
+
+VGGSoundDirector:
+  tag: vggsound_director_test
+  gt_cache: ${prefix}/datasets/VGGSound-Director/cache
+  output_subdir: null
+  tsv: ${prefix}/datasets/VGGSound-Director/memmap/test.tsv
+  memmap_dir: ${prefix}/datasets/VGGSound-Director/memmap/test
+  fgc: ${prefix}/datasets/VGGSound-Director/sts_annotations.json
